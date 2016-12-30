@@ -1,0 +1,11 @@
+/build
+*.iml
+gradlew
+gradlew.bat
+local.properties
+/.gradle
+/.idea
+/gradle
+/captures
+/infer-out
+**/.inferConfig
