@@ -28,6 +28,7 @@ dependencies {
   compile 'com.android.support:design:25.0.0'
   testCompile 'junit:junit:4.12'
 
-
+  compile 'eu.inloop:androidviewmodel:1.2.1'
   compile 'com.google.code.gson:gson:2.8.0'
+  compile 'com.jakewharton.timber:timber:4.4.0'
 }
