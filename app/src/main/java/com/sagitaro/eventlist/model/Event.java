@@ -5,14 +5,15 @@ package com.sagitaro.eventlist.model;
  */
 
 public class Event {
-  public int id;
-  public Long startTime;
-  public Long endTime;
+  public long id;
+  public long startTime;
+  public long endTime;
   public String title;
   public String note;
   public int color;
   public int registered;
   public int capacity;
-  public int cost;
+  public double cost;
+  public String currency;
   public int locationId;
 }
