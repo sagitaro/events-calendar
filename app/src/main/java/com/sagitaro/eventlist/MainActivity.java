@@ -1,7 +1,6 @@
 package com.sagitaro.eventlist;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -10,16 +9,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import com.sagitaro.eventlist.fragment.calendar.CalendarFragment;
+import com.sagitaro.eventlist.helper.DateHelper;
+
+import eu.inloop.viewmodel.base.ViewModelBaseEmptyActivity;
+import eu.inloop.viewmodel.support.ViewModelStatePagerAdapter;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ViewModelBaseEmptyActivity {
 
   /**
    * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     Timber.d("onCreate()");
     super.onCreate(savedInstanceState);
+
     setContentView(R.layout.activity_main);
 
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -51,15 +54,6 @@ public class MainActivity extends AppCompatActivity {
     // Set up the ViewPager with the sections adapter.
     mViewPager = (ViewPager) findViewById(R.id.container);
     mViewPager.setAdapter(mSectionsPagerAdapter);
-
-    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-    fab.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-          .setAction("Action", null).show();
-      }
-    });
   }
 
   @Override
@@ -112,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
-      View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+      View rootView = inflater.inflate(R.layout.fragment_placeholder, container, false);
       TextView textView = (TextView) rootView.findViewById(R.id.section_label);
       textView
         .setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
@@ -124,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
    * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
    * one of the sections/tabs/pages.
    */
-  public class SectionsPagerAdapter extends FragmentPagerAdapter {
+  public class SectionsPagerAdapter extends ViewModelStatePagerAdapter {
 
     public SectionsPagerAdapter(FragmentManager fm) {
       super(fm);
@@ -132,9 +126,38 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public Fragment getItem(int position) {
+      Fragment fragment;
+      String url;
+      String fromDateString =
+        DateHelper.getFormattedDate("yyyy-MM-dd", System.currentTimeMillis(), 0);
+      String toDateString =
+        DateHelper.getFormattedDate("yyyy-MM-dd", System.currentTimeMillis(), 60);
+
       // getItem is called to instantiate the fragment for the given page.
+      switch (position) {
+        case 0:
+          url =
+            "http://rezervace.tanecnistudio.eu/ajax/capacity/107660?afrom=%s&ato=%s&ad=r&efrom=%s&eto=%s&ed=r";
+          url = String.format(url, fromDateString, toDateString, fromDateString, toDateString);
+          fragment = CalendarFragment.createInstance("Sál 1", url);
+          break;
+        case 1:
+          url =
+            "http://rezervace.tanecnistudio.eu/ajax/capacity/31006?afrom=%s&ato=%s&ad=r&efrom=%s&eto=%s&ed=r";
+          url = String.format(url, fromDateString, toDateString, fromDateString, toDateString);
+          fragment = CalendarFragment.createInstance("Sál 2", url);
+          break;
+        case 2:
+          url =
+            "http://rezervace.tanecnistudio.eu/ajax/capacity/308001?afrom=%s&ato=%s&ad=r&efrom=%s&eto=%s&ed=r";
+          url = String.format(url, fromDateString, toDateString, fromDateString, toDateString);
+          fragment = CalendarFragment.createInstance("Sál 3", url);
+          break;
+        default:
+          fragment = PlaceholderFragment.newInstance(position + 1);
+      }
       // Return a PlaceholderFragment (defined as a static inner class below).
-      return PlaceholderFragment.newInstance(position + 1);
+      return fragment;
     }
 
     @Override

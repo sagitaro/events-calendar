@@ -2,4 +2,5 @@
 <resources>
   <string name="pref_key_first_run">pref_key_first_run</string>
   <string name="pref_key_events">pref_key_events</string>
+  <string name="pref_key_locations">pref_key_locations</string>
 </resources>

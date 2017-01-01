@@ -1,5 +1,13 @@
 <resources>
   <string name="app_name">EventList</string>
+
   <string name="action_settings">Settings</string>
   <string name="section_format">Hello World from section: %1$d</string>
+
+  <string name="calendar_no_events">No events</string>
+  <string name="cost_free">FREE</string>
+  <string name="last_update">Last update: %s</string>
+  <string name="cost_with_currency" formatted="false">%s %s</string>
+  <string name="capacity_filled_max" formatted="false">%d / %d</string>
+  <string name="never">Never</string>
 </resources>

@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.sagitaro.eventlist.R;
 import com.sagitaro.eventlist.model.Event;
+import com.sagitaro.eventlist.model.Location;
 
 /**
  * Simple accessor to preferences items.
@@ -80,6 +81,30 @@ public class PreferencesHelper {
     SharedPreferences.Editor editor = mPreferences.edit();
     String json = (events != null) ? new Gson().toJson(events) : null;
     editor.putString(mResources.getString(R.string.pref_key_events), json);
+    editor.apply();
+  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Returns saved events, or null if not set yet.
+   */
+  public Location[] getLocations() {
+    String json = mPreferences.getString(mResources.getString(
+      R.string.pref_key_locations), null);
+    try {
+      return (json != null) ? new Gson().fromJson(json, Location[].class) : null;
+    } catch (JsonParseException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Saves events to shared preferences.
+   */
+  public void setLocations(Location[] locations) {
+    SharedPreferences.Editor editor = mPreferences.edit();
+    String json = (locations != null) ? new Gson().toJson(locations) : null;
+    editor.putString(mResources.getString(R.string.pref_key_locations), json);
     editor.apply();
   }
 
