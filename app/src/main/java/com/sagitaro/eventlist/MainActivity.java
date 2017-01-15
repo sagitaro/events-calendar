@@ -16,6 +16,7 @@ import android.support.v4.view.ViewPager;
 
 import com.sagitaro.eventlist.fragment.calendar.CalendarFragment;
 import com.sagitaro.eventlist.helper.DateHelper;
+import com.sagitaro.eventlist.model.Location;
 
 import eu.inloop.viewmodel.base.ViewModelBaseEmptyActivity;
 import eu.inloop.viewmodel.support.ViewModelStatePagerAdapter;
@@ -45,11 +46,14 @@ public class MainActivity extends ViewModelBaseEmptyActivity {
 
     setContentView(R.layout.activity_main);
 
+/*
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
+    */
     // Create the adapter that will return a fragment for each of the three
     // primary sections of the activity.
     mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
 
     // Set up the ViewPager with the sections adapter.
     mViewPager = (ViewPager) findViewById(R.id.container);
@@ -132,6 +136,7 @@ public class MainActivity extends ViewModelBaseEmptyActivity {
         DateHelper.getFormattedDate("yyyy-MM-dd", System.currentTimeMillis(), 0);
       String toDateString =
         DateHelper.getFormattedDate("yyyy-MM-dd", System.currentTimeMillis(), 60);
+      Location location = new Location();
 
       // getItem is called to instantiate the fragment for the given page.
       switch (position) {
@@ -139,19 +144,31 @@ public class MainActivity extends ViewModelBaseEmptyActivity {
           url =
             "http://rezervace.tanecnistudio.eu/ajax/capacity/107660?afrom=%s&ato=%s&ad=r&efrom=%s&eto=%s&ed=r";
           url = String.format(url, fromDateString, toDateString, fromDateString, toDateString);
-          fragment = CalendarFragment.createInstance("Sál 1", url);
+
+          location.id = 107660;
+          location.url = url;
+          location.name = "Sál 1";
+          fragment = CalendarFragment.createInstance(location);
           break;
         case 1:
           url =
             "http://rezervace.tanecnistudio.eu/ajax/capacity/31006?afrom=%s&ato=%s&ad=r&efrom=%s&eto=%s&ed=r";
           url = String.format(url, fromDateString, toDateString, fromDateString, toDateString);
-          fragment = CalendarFragment.createInstance("Sál 2", url);
+
+          location.id = 31006;
+          location.url = url;
+          location.name = "Sál 2";
+          fragment = CalendarFragment.createInstance(location);
           break;
         case 2:
           url =
             "http://rezervace.tanecnistudio.eu/ajax/capacity/308001?afrom=%s&ato=%s&ad=r&efrom=%s&eto=%s&ed=r";
           url = String.format(url, fromDateString, toDateString, fromDateString, toDateString);
-          fragment = CalendarFragment.createInstance("Sál 3", url);
+
+          location.id = 308001;
+          location.url = url;
+          location.name = "Sál 3";
+          fragment = CalendarFragment.createInstance(location);
           break;
         default:
           fragment = PlaceholderFragment.newInstance(position + 1);

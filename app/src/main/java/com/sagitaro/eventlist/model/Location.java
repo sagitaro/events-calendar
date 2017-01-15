@@ -5,7 +5,7 @@ package com.sagitaro.eventlist.model;
  */
 
 public class Location {
-  public int id;
+  public int id = -1;
   public String name;
   public long lastUpdate;
   public String url;

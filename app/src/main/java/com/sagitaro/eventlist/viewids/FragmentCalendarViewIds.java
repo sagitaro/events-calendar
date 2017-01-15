@@ -23,7 +23,6 @@ public class FragmentCalendarViewIds {
   public RecyclerView eventsRecyclerView;
   public FloatingActionButton floatingButton;
   public TextView emptyView;
-  public ProgressBar loadingProgressBar;
 
   /* Public Methods *******************************************************************************/
 
@@ -42,8 +41,6 @@ public class FragmentCalendarViewIds {
       (FloatingActionButton) rootView.findViewById(R.id.events_floating_button);
     this.emptyView =
       (TextView) rootView.findViewById(R.id.events_empty_view);
-    this.loadingProgressBar =
-      (ProgressBar) rootView.findViewById(R.id.events_progress_bar);
   }
 
   public static FragmentCalendarViewIds inflate(LayoutInflater inflater,

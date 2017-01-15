@@ -10,4 +10,5 @@
   <string name="cost_with_currency" formatted="false">%s %s</string>
   <string name="capacity_filled_max" formatted="false">%d / %d</string>
   <string name="never">Never</string>
+  <string name="event_full">Event is full</string>
 </resources>

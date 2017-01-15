@@ -67,6 +67,7 @@ public class SParser {
       event.startTime = Long.parseLong(matcher.group(1)) * 1000;
       event.endTime = Long.parseLong(matcher.group(2)) * 1000;
       event.capacity = Integer.parseInt(matcher.group(4));
+      event.registered = Integer.parseInt(matcher.group(5));
       event.backgroundColor = colors[Integer.parseInt(matcher.group(7))][0];
       event.borderColor = colors[Integer.parseInt(matcher.group(7))][1];
       event.textColor = App.getResColor(R.color.white);
@@ -80,6 +81,13 @@ public class SParser {
       event.note = note;
       event.cost = Double.parseDouble(matcher.group(12)) / 100;
       event.currency = "CZK";
+
+      if (event.registered > 0 && event.registered >= event.capacity) {
+        event.backgroundColor = Color.WHITE;
+        event.borderColor = Color.RED;
+        event.textColor = Color.RED;
+        event.note = App.getResString(R.string.event_full) + "\r\n\r\n" + event.note;
+      }
 
       eventList.add(event);
     }

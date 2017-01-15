@@ -18,5 +18,5 @@ public class Event {
   public int capacity;
   public double cost;
   public String currency;
-  public String locationId;
+  public int locationId;
 }

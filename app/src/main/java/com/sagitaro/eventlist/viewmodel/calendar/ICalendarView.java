@@ -14,7 +14,6 @@ import eu.inloop.viewmodel.binding.ViewModelBindingConfig;
 public interface ICalendarView extends IView {
   void setEvents(Event[] events);
   void setEmpty(boolean empty);
-  void setLoading(boolean loading);
   void setRefreshing(boolean refreshing);
   void setTitle(String title);
   void setLastUpdate(String lastUpdate);

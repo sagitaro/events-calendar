@@ -7,15 +7,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnScrollChangeListener;
 import android.view.ViewGroup;
 
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sagitaro.eventlist.adapter.EventsAdapter;
 import com.sagitaro.eventlist.fragment.ViewModelFragment;
 import com.sagitaro.eventlist.model.Event;
+import com.sagitaro.eventlist.model.Location;
 import com.sagitaro.eventlist.viewids.FragmentCalendarViewIds;
 import com.sagitaro.eventlist.viewmodel.calendar.CalendarViewModel;
 import com.sagitaro.eventlist.viewmodel.calendar.CalendarViewModel.Argument;
@@ -46,11 +48,12 @@ public class CalendarFragment
 
   /* Public Static Methods ***********************************************************************/
 
-  public static CalendarFragment createInstance(String title, String url) {
+  public static CalendarFragment createInstance(Location location) {
     CalendarFragment fragment = new CalendarFragment();
     Bundle arguments = new Bundle();
-    arguments.putString(Argument.TITLE, title);
-    arguments.putString(Argument.URL, url);
+
+    Gson gson = new GsonBuilder().create();
+    arguments.putString(Argument.LOCATION, gson.toJson(location));
     fragment.setArguments(arguments);
     return fragment;
   }
@@ -146,22 +149,7 @@ public class CalendarFragment
 
     mAdapter.clearEvents();
     mAdapter.addEvents(events);
-  }
-
-  /**
-   * @see ICalendarView#setLoading(boolean)
-   */
-  public void setLoading(boolean loading) {
-    Timber.d("setLoading(): " + loading);
-
-    boolean isEmpty = getViewModel().isEmpty();
-    mViews.eventsRecyclerView.setVisibility((isEmpty || loading) ? View.GONE : View.VISIBLE);
-    mViews.loadingProgressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
-
-    // If loading is done, dismiss RecyclerView pull-to-refresh loading icon.
-    if (!loading) {
-      mViews.swipeRefreshLayout.setRefreshing(false);
-    }
+    mAdapter.notifyDataSetChanged();
   }
 
   /**
@@ -180,8 +168,7 @@ public class CalendarFragment
   public void setEmpty(boolean isEmpty) {
     Timber.d("setEmpty(): setEmpty: " + isEmpty);
 
-    boolean loading = getViewModel().isLoading();
-    mViews.eventsRecyclerView.setVisibility((loading || isEmpty) ? View.GONE : View.VISIBLE);
+    mViews.eventsRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     mViews.emptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
   }
 

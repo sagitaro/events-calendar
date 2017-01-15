@@ -1,11 +1,14 @@
 package com.sagitaro.eventlist;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.res.Resources;
 
 import com.sagitaro.eventlist.core.component.AppComponent;
 import com.sagitaro.eventlist.core.component.DaggerAppComponent;
 import com.sagitaro.eventlist.core.component.module.AppModule;
+
+import java.lang.ref.WeakReference;
 
 import timber.log.Timber;
 import timber.log.Timber.DebugTree;
@@ -29,6 +32,11 @@ public class App extends Application {
    */
   private static AppComponent sAppComponent;
 
+  /**
+   * Application context.
+   */
+  private static WeakReference<Context> sContextReference;
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -41,6 +49,18 @@ public class App extends Application {
     // Initialize attributes.
     sAppComponent = DaggerAppComponent.builder().appModule(new AppModule(this)).build();
     sResources = getResources();
+
+    sContextReference = new WeakReference<Context>(this);
+  }
+
+
+  /* Public Static Methods ************************************************************************/
+
+  /**
+   * Returns application context.
+   */
+  public static Context getContext() {
+    return sContextReference.get();
   }
 
   /**

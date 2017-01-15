@@ -21,6 +21,7 @@ import com.sagitaro.eventlist.model.Event;
 import com.sagitaro.eventlist.viewmodel.calendar.CalendarViewModel;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
@@ -210,9 +211,10 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
           Timber.e("OMG! "+mViewModel.getTitle());
           continue;
         }
-        long today = new DateTime().withTimeAtStartOfDay().getMillis();
+        long today = new DateTime(DateTimeZone.UTC).withTimeAtStartOfDay().getMillis();
         long eventStart = new DateTime(event.startTime).withTimeAtStartOfDay().getMillis();
-        if (eventStart > today) {
+        long eventEnd = new DateTime(event.endTime).withTimeAtStartOfDay().getMillis();
+        if (eventStart >= today || eventEnd >= today) {
           filteredEvents.add(event);
         }
       }
@@ -231,6 +233,8 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
       indexOfFirstEvent++;
     }
     Timber.d("days: " + mDays.size());
+
+    mViewModel.setEmpty(mEvents.isEmpty());
   }
 
   /* Public Static ViewHolders ********************************************************************/

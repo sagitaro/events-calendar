@@ -13,6 +13,7 @@ import com.sagitaro.eventlist.App;
 import com.sagitaro.eventlist.R;
 import com.sagitaro.eventlist.helper.DateHelper;
 import com.sagitaro.eventlist.helper.DateHelper.Output;
+import com.sagitaro.eventlist.helper.NetworkHelper;
 import com.sagitaro.eventlist.helper.PreferencesHelper;
 import com.sagitaro.eventlist.model.Event;
 import com.sagitaro.eventlist.model.Location;
@@ -28,10 +29,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import timber.log.Timber;
 
-/**
- * Created by Patrik on 30. 12. 2016.
- */
-
 public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
 
   /* Public Types *********************************************************************************/
@@ -40,14 +37,11 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
    * Extra identifiers.
    */
   public static class Argument {
-    public static final String TITLE = "title";
-    public static final String URL = "url";
     public static final String LANGUAGE = "language";
-    public static final String LIST_LOADING = "list_loading";
     public static final String LIST_REFRESHING = "list_refreshing";
     public static final String LIST_EMPTY = "list_empty";
     public static final String LOCATION = "location";
-    public static final String EVENTS = "events";
+    //public static final String EVENTS = "events";
   }
 
   /* Private Attributes ***************************************************************************/
@@ -58,16 +52,6 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
   private PreferencesHelper mPreferencesHelper;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Title of the calendar.
-   */
-  private String mTitle;
-
-  /**
-   * Indicates that the content (list) is loading.
-   */
-  private boolean mLoading;
 
   /**
    * Indicates that the content (list) is being refreshed.
@@ -90,8 +74,6 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
   private Location mLocation;
 
   private long mRequested;
-
-  private String mUrl;
 
   /* Public Methods *******************************************************************************/
 
@@ -120,25 +102,11 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
     if (mEvents == null) {
       mEvents = getEvents();
     }
-    if (mLocation == null) {
-      mLocation = new Location();
-      mLocation.name = mTitle;
-      mLocation.url = mUrl;
-    }
   }
 
   public void loadArguments(Bundle state) {
     // Load arguments.
     if (state != null) {
-      if (state.containsKey(Argument.TITLE)) {
-        mTitle = state.getString(Argument.TITLE);
-      }
-      if (state.containsKey(Argument.URL)) {
-        mUrl = state.getString(Argument.URL);
-      }
-      if (state.containsKey(Argument.LIST_LOADING)) {
-        mLoading = state.getBoolean(Argument.LIST_LOADING);
-      }
       if (state.containsKey(Argument.LIST_REFRESHING)) {
         mRefreshing = state.getBoolean(Argument.LIST_REFRESHING);
       }
@@ -150,10 +118,12 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
         mLocation = gson.fromJson(state.getString(
           Argument.LOCATION), Location.class);
       }
+      /*
       if (state.containsKey(Argument.EVENTS)) {
         mEvents = gson.fromJson(state.getString(
           Argument.EVENTS), Event[].class);
       }
+      */
     }
   }
 
@@ -167,16 +137,13 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
     super.onSaveInstanceState(bundle);
 
     // Save arguments.
-    bundle.putString(Argument.TITLE, mTitle);
-    bundle.putString(Argument.URL, mUrl);
     //bundle.putString(Argument.LANGUAGE, mLanguage);
-    bundle.putBoolean(Argument.LIST_LOADING, mLoading);
     bundle.putBoolean(Argument.LIST_REFRESHING, mRefreshing);
     bundle.putBoolean(Argument.LIST_EMPTY, mEmpty);
 
     Gson gson = new GsonBuilder().create();
     bundle.putString(Argument.LOCATION, gson.toJson(mLocation));
-    bundle.putString(Argument.EVENTS, gson.toJson(mEvents));
+    //bundle.putString(Argument.EVENTS, gson.toJson(mEvents));
   }
 
   /**
@@ -189,44 +156,17 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
     super.onBindView(view);
 
     // Call setters for all arguments.
-    setLoading(mLoading);
     setEmpty(mEmpty);
     setEvents(mEvents);
-    setTitle(mTitle);
-    if (mLocation.lastUpdate > 0) {
-      setLastUpdate(mLocation.lastUpdate);
-    }
+    setTitle(mLocation.name);
+    setLastUpdate(mLocation.lastUpdate);
 
     // Make first network request.
     if (mEvents == null || mEvents.length < 1 || mRequested == 0) {
-      setLoading(requestEvents());
+      setRefreshing(requestEvents());
     }
   }
   //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Whether the content (list) is loading.
-   */
-  public boolean isLoading() {
-    return mLoading;
-  }
-
-  /**
-   * Sets whether the content (list) is loading.
-   *
-   * @param loading Whether the content is loading.
-   */
-  public void setLoading(boolean loading) {
-    Timber.d("setLoading()");
-
-    mLoading = loading;
-
-    // Update view with new data.
-    ICalendarView view = getView();
-    if (view != null) {
-      view.setLoading(mLoading);
-    }
-  }
 
   /**
    * Sets whether the content (list) is being refreshed.
@@ -311,14 +251,14 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
         Timber.e("setEvents(): event is null");
         continue;
       }
-      event.locationId = mTitle;
+      event.locationId = mLocation.id;
     }
 
     mPreferencesHelper.setEvents(events);
 
     // Update view with new data.
     ICalendarView view = getView();
-    if (view != null && events != null) {
+    if (view != null) {
       view.setEvents(events);
     }
   }
@@ -327,7 +267,7 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
    * Gets events.
    */
   public Event[] getEvents() {
-    Timber.d("getEvents(): " + mTitle);
+    Timber.d("getEvents(): " + mLocation.name);
 
     Event[] events = mPreferencesHelper.getEvents();
     if (events == null) {
@@ -338,10 +278,10 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
     if (events.length > 0) {
       for (Event event : events) {
         if (event == null) {
-          Timber.d("Jeeeez:" +mTitle);
-          break;
+          Timber.d("Event at index " + n + " is null:" + mLocation.name);
+          continue;
         }
-        if (event.locationId != null && event.locationId.equals(mTitle)) {
+        if (mLocation.id > 0 && event.locationId == mLocation.id) {
           eventList.add(event);
         }
       }
@@ -352,7 +292,7 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
   }
 
   public String getTitle() {
-    return mTitle;
+    return mLocation.name;
   }
 
   /**
@@ -378,16 +318,14 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
   public void setLastUpdate(long lastUpdate) {
     Timber.d("setLastUpdate()");
 
-    if (lastUpdate == mLocation.lastUpdate) {
-      return;
-    }
     mLocation.lastUpdate = lastUpdate;
     saveLocation(mLocation);
 
     // Update view with new data.
     ICalendarView view = getView();
     if (view != null) {
-      String lastUpdateTime = lastUpdate == 0 ? App.getResString(R.string.never) : DateHelper.format(Output.ALL, lastUpdate);
+      String lastUpdateTime = lastUpdate == 0 ? App.getResString(R.string.never) :
+        DateHelper.format(Output.ALL, lastUpdate);
       String lastUpdateString =
         App.getResString(R.string.last_update, lastUpdateTime);
       view.setLastUpdate(lastUpdateString);
@@ -403,11 +341,15 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   public boolean requestEvents() {
-    return requestEvents(mUrl);
+    return requestEvents(mLocation.url);
   }
 
   public boolean requestEvents(String url) {
     Timber.d("requestEvents(): " + url);
+
+    if (!NetworkHelper.isInternetAvailable()) {
+      return false;
+    }
 
     mRequested = System.currentTimeMillis();
     OkHttpHandler request = new OkHttpHandler();
@@ -419,6 +361,13 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
   private class OkHttpHandler extends AsyncTask<String, Void, String> {
 
     OkHttpClient client = new OkHttpClient();
+
+    @Override
+    protected void onPreExecute() {
+      Timber.d("onPreExecute()");
+      super.onPreExecute();
+      setRefreshing(true);
+    }
 
     @Override
     protected String doInBackground(String... params) {
@@ -454,7 +403,6 @@ public class CalendarViewModel extends AbstractViewModel<ICalendarView> {
         Timber.d("onPostExecute(): exception: " + e.getMessage());
         //tv.setText("sorry, something went wrong!");
       }
-      setLoading(false);
       setRefreshing(false);
     }
   }
